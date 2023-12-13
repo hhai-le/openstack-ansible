@@ -1,0 +1,11 @@
+- name: remove default loopback host
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127.0.1.1.*'
+    state: absent
+
+- name: update hosts  file
+  blockinfile:
+    path: /etc/hosts
+    state: present
+    block: "{{ lookup('template', 'hosts.j2') }}"

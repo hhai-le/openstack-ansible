@@ -1,0 +1,24 @@
+- name: install memcached
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+  - memcached
+  - python3-memcache
+  when: controller|bool == true
+
+- name: update /etc/memcached.conf
+  lineinfile:
+    path: /etc/memcached.conf
+    regexp: '^-l'
+    line: "-l {{ controller_ip }} "
+    state: present
+  when: controller|bool == true
+
+- name: restart memcached
+  service:
+    name: memcached
+    state: restarted
+  when: controller|bool == true
+

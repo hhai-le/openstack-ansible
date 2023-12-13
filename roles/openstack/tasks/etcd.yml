@@ -1,0 +1,27 @@
+- name: install etcd
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+  - etcd
+  - etcd-client
+  - python3-etcd
+  when: controller|bool == true
+
+- name: update /etc/default/etcd
+  blockinfile:
+    path: /etc/default/etcd
+    block: |
+      ETCD_NAME="controller"
+      ETCD_DATA_DIR="/var/lib/etcd"
+      ETCD_INITIAL_CLUSTER_STATE="new"
+      ETCD_INITIAL_CLUSTER_TOKEN="etcd-cluster-01"
+      ETCD_INITIAL_CLUSTER="controller=http://openstack-1:2380"
+      ETCD_INITIAL_ADVERTISE_PEER_URLS="http://openstack-1:2380"
+      ETCD_ADVERTISE_CLIENT_URLS="http://openstack-1:2379"
+      ETCD_LISTEN_PEER_URLS="http://0.0.0.0:2380"
+      ETCD_LISTEN_CLIENT_URLS="http://openstack-1:2379"
+    marker: "# BEGIN: etcd configuration"
+  when: controller|bool == true
+

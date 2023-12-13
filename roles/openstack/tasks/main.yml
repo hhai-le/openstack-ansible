@@ -1,0 +1,10 @@
+- include_tasks: add_openstack_repo.yml
+- include_tasks: update_hosts_file.yml
+- include_tasks: mariadb.yml
+- include_tasks: memcached.yml
+- include_tasks: rabbitmq.yml
+- include_tasks: etcd.yml
+- include_tasks: keystone.yml
+- include_tasks: glance.yml
+- include_tasks: placement.yml
+- include_tasks: nova.yml

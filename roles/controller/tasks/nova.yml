@@ -1,0 +1,84 @@
+- name: create database for nova
+  shell: |
+    mysql -uroot -e "create database nova; "
+    mysql -uroot -e "grant all privileges on nova.* to nova@'localhost' identified by '{{NOVA_DBPASS}}'; "
+    mysql -uroot -e "grant all privileges on nova.* to nova@'%' identified by '{{NOVA_DBPASS}}'; "
+    mysql -uroot -e "create database nova_api; "
+    mysql -uroot -e "grant all privileges on nova_api.* to nova@'localhost' identified by '{{NOVA_DBPASS}}'; "
+    mysql -uroot -e "grant all privileges on nova_api.* to nova@'%' identified by '{{NOVA_DBPASS}}'; "
+    mysql -uroot -e "create database nova_cell0; "
+    mysql -uroot -e "grant all privileges on nova_cell0.* to nova@'localhost' identified by '{{NOVA_DBPASS}}'; "
+    mysql -uroot -e "grant all privileges on nova_cell0.* to nova@'%' identified by '{{NOVA_DBPASS}}'; "
+    mysql -uroot -e "flush privileges; "
+  when: controller|bool == true
+
+- name: create nova user
+  shell: ". /root/keystonerc\nopenstack user create --domain default --password {{NOVA_PASS}} nova \nopenstack role add --project service --user nova admin \nopenstack service create --name nova --description \"OpenStack Compute service\" compute \nopenstack endpoint create --region RegionOne compute public http://{{ controller_hostname}}:8774/v2.1/%\\(tenant_id\\)s \nopenstack endpoint create --region RegionOne compute internal http://{{ controller_hostname}}:8774/v2.1/%\\(tenant_id\\)s \nopenstack endpoint create --region RegionOne compute admin http://{{ controller_hostname}}:8774/v2.1/%\\(tenant_id\\)s \n"
+  when: controller|bool == true
+
+- name: install nova
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - nova-api
+  - nova-conductor
+  - nova-novncproxy
+  - nova-scheduler
+  - python3-novaclient
+  when: controller|bool == true
+
+- name: backup nova.conf
+  shell: |
+    mv /etc/nova/nova.conf /etc/nova/nova.conf.bak
+  when: controller|bool == true
+
+- name: create nova.conf
+  template:
+    src: nova.conf.j2
+    dest: /etc/nova/nova.conf
+    owner: nova
+    group: nova
+    mode: 0640
+  when: controller|bool == true
+
+
+- name: populate nova database
+  shell: |
+    su -s /bin/sh -c "nova-manage api_db sync" nova
+    su -s /bin/sh -c "nova-manage cell_v2 map_cell0" nova
+    su -s /bin/sh -c "nova-manage cell_v2 create_cell --name=cell1 --verbose" nova
+    su -s /bin/sh -c "nova-manage db sync" nova
+  when: controller|bool == true
+
+- name: restart nova services
+  shell: |
+    service nova-api restart
+    service nova-scheduler restart
+    service nova-conductor restart
+    service nova-novncproxy restart
+  when: controller|bool == true
+
+- name: install nova compute kvm
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+  - qemu
+  - qemu-kvm
+  - libvirt-daemon-system
+  - libvirt-clients
+  - bridge-utils
+  - virtinst
+  - cpu-checker
+  - libosinfo-bin
+  - nova-compute
+  - nova-compute-kvm
+  when: controller|bool == true
+  
+- name: discover compute hosts
+  shell: |
+    . /root/keystonerc
+    su -s /bin/bash nova -c "nova-manage cell_v2 discover_hosts"
+  when: controller|bool == true

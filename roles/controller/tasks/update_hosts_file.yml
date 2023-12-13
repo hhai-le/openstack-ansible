@@ -1,0 +1,22 @@
+- name: remove default loopback host
+  lineinfile:
+    path: /etc/hosts
+    regexp: '^127.0.1.1.*'
+    state: absent
+
+- name: print ip
+  debug:
+    var: ansible_facts.default_ipv4.address
+
+- name: remove default loopback host
+  lineinfile:
+    path: /etc/hosts
+    regexp: "^{{ansible_facts.default_ipv4.address}}.*"
+    state: absent
+
+- name: update hosts  file
+
+  blockinfile:
+    path: /etc/hosts
+    state: present
+    block: "{{ lookup('template', '../../hosts.j2') }}"

@@ -1,0 +1,5 @@
+- name: create keystone service
+  shell: |
+    . /root/keystonerc
+    openstack project create --domain default --description "Service Project" service
+  when: controller|bool == true

@@ -1,0 +1,52 @@
+- name: config database for glance
+  shell: |
+    mysql -uroot -e "CREATE DATABASE glance;"
+    mysql -uroot -e "GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'localhost' IDENTIFIED BY '{{GLANCE_DBPASS}}';"
+    mysql -uroot -e "GRANT ALL PRIVILEGES ON glance.* TO 'glance'@'%' IDENTIFIED BY '{{GLANCE_DBPASS}}';"
+    mysql -uroot -e "FLUSH PRIVILEGES;"
+  when: controller|bool == true
+
+- name: create glance user
+  shell: |
+    . /root/keystonerc
+    openstack user create --domain default --password {{GLANCE_PASS}} glance >> /tmp/glance_user_create.log  2>&1 
+    openstack role add --project service --user glance admin >> /tmp/glance_user_create.log 2>&1 
+    openstack service create --name glance --description "OpenStack Image Service" image >> /tmp/glance_user_create.log  2>&1 
+    openstack endpoint create --region RegionOne image public http://{{ controller_hostname}}:9292 >> /tmp/glance_user_create.log 2>&1 
+    openstack endpoint create --region RegionOne image internal http://{{ controller_hostname}}:9292 >> /tmp/glance_user_create.log  2>&1 
+    openstack endpoint create --region RegionOne image admin http://{{ controller_hostname}}:9292 >> /tmp/glance_user_create.log  2>&1 
+  when: controller|bool == true
+
+- name: install glance
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+  - glance
+  - python3-glanceclient
+  when: controller|bool == true
+
+- name: backup /etc/glance/glance-api.conf
+  shell: "mv /etc/glance/glance-api.conf /etc/glance/glance-api.conf.bak"
+  when: controller|bool == true
+
+- name: create /etc/glance/glance-api.conf
+  template:
+    src: glance-api.conf.j2
+    dest: /etc/glance/glance-api.conf
+    owner: root
+    group: root
+    mode: 0644
+  when: controller|bool == true
+
+- name: populate glance database
+  shell: su -s /bin/bash glance -c "glance-manage db_sync" >> /tmp/glance_db_sync.log 2>&1
+  when: controller|bool == true
+
+- name: restart glance-api
+  service:
+    name: glance-api
+    state: restarted
+  when: controller|bool == true
+

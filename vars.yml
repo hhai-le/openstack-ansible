@@ -1,0 +1,30 @@
+KEYSTONE_ADMIN_PASS: "password"
+KEYSTONE_DBPASS: "password"
+GLANCE_DBPASS: "password"
+GLANCE_PASS: "password"
+NOVA_DBPASS: "password"
+NOVA_PASS: "password"
+NEUTRON_DBPASS: "password"
+NEUTRON_PASS: "password"
+DASH_DBPASS: "password"
+CINDER_DBPASS: "password"
+CINDER_PASS: "password"
+PLACEMENT_DBPASS: "password"
+PLACEMENT_PASS: "password"
+RABBIT_PASS: "password"
+METADATA_SECRET: "METADATA_SECRET"
+OVERLAY_INTERFACE_IP_ADDRESS: ""
+
+controller_ip: 192.168.148.216
+controller_hostname: vnl-auto-docker
+
+####
+#controller: false
+#nova: false
+#neutron: false
+#cinder: false
+#block_storage: false
+#object_storage: false
+#dashboard: false
+#placement: false
+####

@@ -1,0 +1,23 @@
+controller:
+  hosts:
+    192.168.148.216:
+#controller:
+#  hosts:
+#    openstack-1:
+#      ansible_host: 192.168.148.216
+#      roles:
+#      - controller
+#      - nova
+#      - neutron
+#nova:
+#  hosts:
+#    openstack-2:
+#      ansible_host: 192.168.148.216
+#      roles:
+#      - nova
+#neutron:
+#  hosts:
+#    openstack-3:
+#      ansible_host: 192.168.148.216
+#      roles:
+#      - neutron
