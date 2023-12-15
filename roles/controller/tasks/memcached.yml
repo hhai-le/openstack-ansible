@@ -6,7 +6,7 @@
   with_items:
   - memcached
   - python3-memcache
-  when: controller|bool == true
+ 
 
 - name: update /etc/memcached.conf
   lineinfile:
@@ -14,11 +14,11 @@
     regexp: '^-l'
     line: "-l {{ controller_ip }} "
     state: present
-  when: controller|bool == true
+ 
 
 - name: restart memcached
   service:
     name: memcached
     state: restarted
-  when: controller|bool == true
+ 
 

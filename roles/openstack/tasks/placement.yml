@@ -4,11 +4,11 @@
     mysql -uroot -e "GRANT ALL PRIVILEGES ON placement.* TO 'placement'@'localhost' IDENTIFIED BY '{{PLACEMENT_DBPASS}}';"
     mysql -uroot -e "GRANT ALL PRIVILEGES ON placement.* TO 'placement'@'%' IDENTIFIED BY '{{PLACEMENT_DBPASS}}';"
     mysql -uroot -e "FLUSH PRIVILEGES;"
-  when: controller|bool == true
+ 
 
 - name: create placement user
   shell: ". /root/keystonerc\nopenstack user create --domain default --password {{PLACEMENT_PASS}} placement>> /tmp/placement_user_create.log  2>&1 \nopenstack role add --project service --user placement admin >> /tmp/placement_user_create.log 2>&1 \nopenstack service create --name placement --description \"Placement API\" placement >> /tmp/placement_user_create.log  2>&1 \nopenstack endpoint create --region RegionOne placement public http://{{ controller_hostname}}:8778 >> /tmp/placement_user_create.log 2>&1 \nopenstack endpoint create --region RegionOne placement internal http://{{ controller_hostname}}:8778 >> /tmp/placement_user_create.log  2>&1 \nopenstack endpoint create --region RegionOne placement admin http://{{ controller_hostname}}:8778 >> /tmp/placement_user_create.log  2>&1 \n"
-  when: controller|bool == true
+ 
 
 - name: install placement packages
   apt:
@@ -16,12 +16,12 @@
     state: present
   with_items:
   - placement-api
-  when: controller|bool == true
+ 
 
 - name: backup placement.conf
   shell: |
     mv /etc/placement/placement.conf /etc/placement/placement.conf.bak
-  when: controller|bool == true
+ 
 
 - name: create placement.conf
   template:
@@ -30,15 +30,15 @@
     owner: root
     group: root
     mode: 0644
-  when: controller|bool == true
+ 
 
 - name: populate placement database
   shell: |
     su -s /bin/sh -c "placement-manage db sync" placement
-  when: controller|bool == true
+ 
 
 - name: restart apache2
   service:
     name: apache2
     state: restarted
-  when: controller|bool == true
+ 

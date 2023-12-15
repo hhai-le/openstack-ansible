@@ -1,5 +1,5 @@
 ---
-- hosts: all
+- hosts: controller
   become: yes
   become_user: root
   become_method: sudo
@@ -9,4 +9,37 @@
   - name: install openstack
     include_role:
       name: roles/controller
-    when: controller
+
+- hosts: nova
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars_files:
+    - vars.yml
+  tasks:
+  - name: install openstack
+    include_role:
+      name: roles/nova
+
+- hosts: controller
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars_files:
+    - vars.yml
+  tasks:
+  - name: install openstack
+    include_role:
+      name: roles/controller
+      tasks_from: nova_discover_hosts.yml
+
+- hosts: neutron
+  become: yes
+  become_user: root
+  become_method: sudo
+  vars_files:
+    - vars.yml
+  tasks:
+  - name: install openstack 
+    include_role:
+      name: roles/neutron

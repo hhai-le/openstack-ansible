@@ -6,7 +6,7 @@
   with_items:
   - memcached
   - python3-memcache
-  when: controller|bool == true
+ 
 
 - name: update /etc/memcached.conf
   lineinfile:
@@ -16,4 +16,4 @@
     state: present
   notify:
   - restart memcached
-  when: controller|bool == true
+ 

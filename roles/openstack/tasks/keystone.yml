@@ -4,7 +4,7 @@
     mysql -uroot -e "GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'localhost' IDENTIFIED BY '{{KEYSTONE_DBPASS}}';"
     mysql -uroot -e "GRANT ALL PRIVILEGES ON keystone.* TO 'keystone'@'%' IDENTIFIED BY '{{KEYSTONE_DBPASS}}';"
     mysql -uroot -e "FLUSH PRIVILEGES;"
-  when: controller|bool == true
+ 
 
 - name: install keystone
   apt:
@@ -17,7 +17,7 @@
   - apache2
   - libapache2-mod-wsgi-py3
   - python3-oauth2client
-  when: controller|bool == true
+ 
 
 - name: update /etc/keystone/keystone.conf
   lineinfile:
@@ -25,7 +25,7 @@
     regexp: '^#memcache_server.*'
     line: "memcache_server = {{ controller_ip }}:11211"
     state: present
-  when: controller|bool == true
+ 
 
 - name: update /etc/keystone/keystone.conf
   lineinfile:
@@ -33,7 +33,7 @@
     regexp: '^connection.*'
     line: "connection = mysql+pymysql://keystone:{{KEYSTONE_DBPASS}}@{{ controller_ip }}/keystone"
     state: present
-  when: controller|bool == true
+ 
 
 - name: update /etc/keystone/keystone.conf
   lineinfile:
@@ -41,22 +41,22 @@
     line: "provider = fernet"
     insertafter: '^\[token\]'
     state: present
-  when: controller|bool == true
+ 
 
 - name: populate keystone database
   shell: su -s /bin/bash keystone -c "keystone-manage db_sync" >> /tmp/keystone_db_sync.log 2>&1
-  when: controller|bool == true
+ 
 
 - name: initialize fernet key
 
   shell: |
     keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone
     keystone-manage credential_setup --keystone-user keystone --keystone-group keystone
-  when: controller|bool == true
+ 
 
 - name: bootstrap keystone
   shell: "keystone-manage bootstrap --bootstrap-password {{KEYSTONE_ADMIN_PASS}} --bootstrap-admin-url http://{{ controller_ip }}:5000/v3/ --bootstrap-internal-url http://{{ controller_ip }}:5000/v3/ --bootstrap-public-url http://{{ controller_ip }}:5000/v3/ --bootstrap-region-id RegionOne >> /tmp/keystone_bootstrap.log 2>&1"
-  when: controller|bool == true
+ 
 
 - name: update /etc/apache2/apache2.conf
 
@@ -67,7 +67,7 @@
     state: present
   notify:
   - restart apache2
-  when: controller|bool == true
+ 
 
 - name: create keystonerc
   template:
@@ -76,17 +76,17 @@
     owner: root
     group: root
     mode: 0600
-  when: controller|bool == true
+ 
 
 - name: update bashrc
   lineinfile:
     path: /root/.bashrc
     line: "source /root/keystonerc"
     state: present
-  when: controller|bool == true
+ 
 
 - name: create project service
   shell: |
     . /root/keystonerc
     openstack project create --domain default --description "Service Project" service >> /tmp/openstack_project_create.log 2>&1
-  when: controller|bool == true
+ 

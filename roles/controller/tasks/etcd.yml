@@ -7,7 +7,7 @@
   - etcd
   - etcd-client
   - python3-etcd
-  when: controller|bool == true
+ 
 
 - name: update /etc/default/etcd
   blockinfile:
@@ -23,5 +23,5 @@
       ETCD_LISTEN_PEER_URLS="http://0.0.0.0:2380"
       ETCD_LISTEN_CLIENT_URLS="http://openstack-1:2379"
     marker: "# BEGIN: etcd configuration"
-  when: controller|bool == true
+ 
 

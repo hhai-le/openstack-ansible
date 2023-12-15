@@ -1,17 +1,13 @@
 [DEFAULT]
 core_plugin = ml2
-service_plugins = router
-allow_overlapping_ips = true
 transport_url = rabbit://openstack:{{ RABBIT_PASS }}@{{ controller_hostname}}
 auth_strategy = keystone
-notify_nova_on_port_status_changes = true
-notify_nova_on_port_data_changes = true
 [agent]
 root_helper = "sudo /usr/bin/neutron-rootwrap /etc/neutron/rootwrap.conf"
 [cache]
 [cors]
 [database]
-connection = mysql+pymysql://neutron:{{NEUTRON_DBPASS}}@{{ controller_hostname}}/neutron
+connection = sqlite:////var/lib/neutron/neutron.sqlite
 [designate]
 [experimental]
 [healthcheck]
@@ -27,14 +23,6 @@ project_name = service
 username = neutron
 password = {{NEUTRON_PASS}}
 [nova]
-auth_url = http://{{ controller_hostname}}:5000
-auth_type = password
-project_domain_name = Default
-user_domain_name = Default
-region_name = RegionOne
-project_name = service
-username = nova
-password = {{NOVA_PASS}}
 [oslo_concurrency]
 lock_path = /var/lib/neutron/tmp
 [oslo_messaging_amqp]

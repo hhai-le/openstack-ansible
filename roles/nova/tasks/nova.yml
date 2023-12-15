@@ -4,30 +4,22 @@
     state: present
   with_items:
   - nova-compute
-  when: nova|bool == true
+
 
 - name: backup nova.conf
   shell: |
     mv /etc/nova/nova.conf /etc/nova/nova.conf.bak
-  when: nova|bool == true
+
 
 - name: create nova.conf
   template:
-    src: nova.conf.j2
+    src: templates/nova.conf.j2
     dest: /etc/nova/nova.conf
     owner: nova
     group: nova
     mode: 0640
-  when: nova|bool == true
 
-- name: create nova.conf
-  template:
-    src: nova.compute.conf.j2
-    dest: /etc/nova/nova.conf
-    owner: nova
-    group: nova
-    mode: 0640
-  when: nova|bool == true 
+
 
 - name: install nova compute kvm
   apt:
@@ -45,13 +37,3 @@
   - libosinfo-bin
   - nova-compute
   - nova-compute-kvm
-  when: nova|bool == true
-
-- name: discover compute hosts
-  shell: |
-    . /root/keystonerc
-    su -s /bin/bash nova -c "nova-manage cell_v2 discover_hosts"
-  delegate_to: controller
-  become: true
-  become_method: sudo
-  when: nova|bool == true

@@ -6,13 +6,13 @@
   with_items:
   - rabbitmq-server
   - python3-pymysql
-  when: controller|bool == true
+ 
 
 - name: rabbitmqctl add_user openstack rabbitmq
   shell: "rabbitmqctl add_user openstack {{ RABBIT_PASS }}"
-  when: controller|bool == true
+ 
 
 - name: rabbitmqctl set_permissions openstack
   shell: rabbitmqctl set_permissions openstack ".*" ".*" ".*"
-  when: controller|bool == true
+ 
 

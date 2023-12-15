@@ -1,2 +1,6 @@
 ---
 # tasks file for nova
+- include_tasks: add_openstack_repo.yml
+- include_tasks: update_hosts_file.yml
+- include_tasks: nova.yml
+- include_tasks: neutron.yml
